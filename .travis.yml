@@ -1,5 +1,0 @@
-language: python
-python:
-  - nightly
-sudo: true
-script: ./daemon start
