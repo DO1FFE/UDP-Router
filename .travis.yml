@@ -1,4 +1,4 @@
 language: python
 python:
   - nightly
-script: ./daemon start
+script: sudo daemon start
