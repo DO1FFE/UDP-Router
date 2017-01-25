@@ -1,0 +1,28 @@
+######################
+# History of changes #
+######################
+
+Legend:
+
+NEW - added feature
+CHG - changed feature or option
+FIX - bugfix
+DEL - removed feature
+
+--- 0.0.1 --- 08.02.2005 ---
+
+NEW Shell script for starting and stopping the router
+NEW Write messages to a logfile
+
+--- 0.0.1pre8 --- 07.02.2005 ---
+
+FIX Do not delete routes while iterating through the route table. Thanks DKR201
+
+--- 0.0.1pre7 --- 06.02.2005 ---
+
+NEW Monitor and AX25 protocol id (PID) detection
+NEW Frame check sequence (CRC16) to test incoming packets on errors
+NEW Automatic resolving of hostnames on startup and timeout of route lifetime
+NEW Learning routes (IP/port und callsign/ssid of sender) from incoming frames
+NEW Route aging (lifetime configurable)
+

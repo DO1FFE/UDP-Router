@@ -1,0 +1,63 @@
+#! /bin/sh
+#
+# Author:	DAP900 Daniel Parthey <pada@hrz.tu-chemnitz.de>
+#
+# axrouter start script for linux
+
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DESC="AX25 UDP Router"
+NAME="axrouter"
+DAEMON="`dirname $0`/axrouter.py"
+
+# Gracefully exit if the package has been removed.
+test -x $DAEMON || exit 0
+
+#	Function that starts the daemon/service.
+d_start() {
+  "$DAEMON" &> /dev/null &
+}
+
+#	Function that stops the daemon/service.
+d_stop() {
+  axrouter_ps=`ps a | grep "python.*axrouter.py" | grep -v "grep" ||:`
+  if [ -n "$axrouter_ps" ]; then
+    echo "$axrouter_ps" | \
+    while read pid rest; do
+      kill -TERM "$pid"
+    done
+  else
+    echo "... no processes found"
+  fi
+}
+
+case "$1" in
+  start)
+    echo -n "Starting $DESC: $NAME"
+    d_start
+    echo "."
+	;;
+  stop)
+    echo -n "Stopping $DESC: $NAME"
+    d_stop
+    echo "."
+	;;
+  restart|force-reload)
+    echo -n "Restarting $DESC: $NAME"
+    d_stop
+    sleep 1
+    d_start
+    echo "."
+	;;
+  *)
+  echo
+  echo "AXUDP Router - startup script (c) DAP900"
+  echo
+	echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+  echo
+	exit 1
+	;;
+esac
+
+exit 0
