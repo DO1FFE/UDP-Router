@@ -41,7 +41,7 @@ def open_logfile(workdir, filename):
   if not os.path.isabs(filename):
     filename = os.path.join(workdir, filename)
   # open the logfile in unbuffered mode
-  logfile = file(filename, "w", buffering=0)
+  logfile = open(filename, "w")
 
 def log(string):
   """

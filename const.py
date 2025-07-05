@@ -29,9 +29,6 @@ import os
 
 # Constants
 
-# Some python versions do not know about True and False
-False = 0
-True  = 1
 
 # Newline character depends on the operating system
 NL = os.linesep

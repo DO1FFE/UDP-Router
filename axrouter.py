@@ -1,6 +1,5 @@
-#!/bin/sh -
+#!/usr/bin/env python3
 # -*- coding: iso-8859-1 -*-
-"exec" "python" "-u" "-O" "$0" "$@"
 
 # PROGRAMM VERSION
 __version__ = "0.0.1"
@@ -55,7 +54,7 @@ conf = {
 }
 
 def show_usage():
-  print """
+  print("""
 AX25 over UDP router - Version %s
 
 Copyright (c) 2005 by DAP900, Daniel Parthey
@@ -75,7 +74,7 @@ Options:
   -d  --debug=<0..9>       print debug messages (0=none, ... 9=all)
 
 Usage:  %s [OPTIONS]
-""" % (__version__, sys.argv[0])
+""" % (__version__, sys.argv[0]))
 
 class UDP_Router:
   """
@@ -114,11 +113,11 @@ class UDP_Router:
     try:
       self.udp_socket.bind((conf['listen'], conf['udp_port']))
       if conf['quiet'] is False: logfile.log_print("OK"+NL)
-    except Exception, error_message:
+    except Exception as error_message:
       if conf['quiet'] is False: logfile.log_print("FAILED"+NL)
       logfile.log_print("could not bind %s:%i" % \
                      (conf['listen'], conf['udp_port']) + NL)
-      print error_message
+      print(error_message)
       try:
         traceback.print_exc(file=logfile.logfile)
       except: pass
@@ -148,23 +147,23 @@ class UDP_Router:
     try:
       self.udp_socket.close()
       if conf['quiet'] is False: logfile.log_print("OK"+NL)
-    except Exception, error_message:
+    except Exception as error_message:
       if conf['quiet'] is False:
         logfile.log_print("FAILED"+NL)
-        print error_message
+        print(error_message)
         try:
           traceback.print_exc(file=logfile.logfile)
         except: pass
     # close logfile
     if conf['quiet'] is False:
-      print "Close logfile:",
+      print("Close logfile:", end=' ')
     try:
       logfile.logfile.close()
-      if conf['quiet'] is False: print "OK"
-    except Exception, error_message:
+      if conf['quiet'] is False: print("OK")
+    except Exception as error_message:
       if conf['quiet'] is False:
-        print "FAILED"
-        print error_message
+        print("FAILED")
+        print(error_message)
 
   def __build_routing_table(self):
     """
@@ -182,12 +181,12 @@ class UDP_Router:
       routes = config.routes
       if conf['quiet'] is False:
         logfile.log_print("OK"+NL)
-    except Exception, error_message:
+    except Exception as error_message:
       # start with empty route configuration if it cannot be imported
       routes = {}
       if conf['quiet'] is False:
         logfile.log_print("FAILED")
-        print error_message
+        print(error_message)
         try:
           traceback.print_exc(file=logfile.logfile)
         except: pass
@@ -195,7 +194,7 @@ class UDP_Router:
     # build routing table and resolve DNS hostnames
     if conf['debug'] >= 3:
       logfile.log_print(NL+"--- Resolving hostnames ---"+NL+NL)
-    for route in routes.iteritems():
+    for route in routes.items():
       # extract information from route list (split the list)
       try:
         # split information
@@ -205,9 +204,9 @@ class UDP_Router:
         # convert port to an integer (probably the user has given a string)
         port = int(port)
       # handle parsing errors of routes.py config file
-      except Exception, error_message:
-        print "Error: Syntax error in file routes.py"
-        print error_message
+      except Exception as error_message:
+        print("Error: Syntax error in file routes.py")
+        print(error_message)
         try:
           traceback.print_exc(file=logfile.logfile)
         except: pass
@@ -258,7 +257,7 @@ class UDP_Router:
       if current_time > self.route_aging_timestamp:
         # age routes, because it is at least one second later
         # remember all routes
-        all_route_entries = self.routing_table.keys()
+        all_route_entries = list(self.routing_table.keys())
         # iterate all routes and update or delete routes
         for route_entry in all_route_entries:
           # decrease lifetime by the amount of passed time since last aging
@@ -272,7 +271,7 @@ class UDP_Router:
             # if route is user defined (hostname configured), renew it
             if self.routing_table[route_entry]['conf_host'] is not None:
               hostname = self.routing_table[route_entry]['conf_host']
-              if conf['debug'] >= 3 is True:
+              if conf['debug'] >= 3:
                 logfile.log_print("Resolve %s because route has expired: " % \
                                (hostname))
               # resolve the configured hostname to renew the IP
@@ -299,8 +298,9 @@ class UDP_Router:
     # remember time in seconds since Epoch for the next aging run
     self.route_aging_timestamp = current_time
       
-  def __learn_route(self, source_call, source_ssid, (ip,port)):
+  def __learn_route(self, source_call, source_ssid, ip_port):
     # learn route only if source_call is not empty
+    ip, port = ip_port
     if source_call is not None:
       # inform the interested user about the learned route
       if conf['verbose'] is True or conf['debug'] >= 7:
@@ -308,7 +308,7 @@ class UDP_Router:
                        (source_call, source_ssid, ip, port))
         self.__print_routing_table()
       # if route is already in routing table
-      if self.routing_table.has_key((source_call, source_ssid)):
+      if (source_call, source_ssid) in self.routing_table:
         # dynamically update the route (IP and port)
         self.routing_table[(source_call, source_ssid)]['ip']   = ip
         self.routing_table[(source_call, source_ssid)]['port'] = port
@@ -342,7 +342,7 @@ class UDP_Router:
                       "Dynamic Route", \
                       "", \
                       "Lifetime")+NL)
-      for (callsign,ssid),route in self.routing_table.iteritems():
+      for (callsign,ssid),route in self.routing_table.items():
         # print and log route
         logfile.log_print("%6s-%-2i:%30s:%-5i %15s:%-5i %02i:%02i:%02i"%\
               ( \
@@ -372,12 +372,12 @@ class UDP_Router:
     # module l2.py and search for decode_frame()
     try:
       frame_info = l2.decode_frame(packet, conf['debug'])
-    except l2.InvalidFrameException, error_message:
+    except l2.InvalidFrameException as error_message:
       if conf['quiet'] == False:
         logfile.log_print("Packet decoding error (contents of packet logged)")
         logfile.log(debug.dump_string(packet))
         # print exception and log traceback
-        print error_message
+        print(error_message)
         try:
           traceback.print_exc(file=logfile.logfile)
         except: pass
@@ -412,10 +412,10 @@ class UDP_Router:
       if frame_info['poll_flag'] == True: monitor += "+"
       else:                               monitor += "-"
       # pid
-      if frame_info.has_key('protocol_id'):
+      if 'protocol_id' in frame_info:
         monitor += " pid %02X" % (frame_info['protocol_id'])
       # protocol
-      if frame_info.has_key('protocol'):
+      if 'protocol' in frame_info:
         monitor += " (%s)" % (frame_info['protocol'])
       # Sender
       monitor += " ["
@@ -439,10 +439,8 @@ class UDP_Router:
     ip_destination_address = None
 
     # try to find a routing entry for the destination callsign and ssid
-    if self.routing_table.has_key(
-         (frame_info['recipient_id']['callsign'],
-          frame_info['recipient_id']['ssid'])
-       ):
+    if (frame_info['recipient_id']['callsign'],
+          frame_info['recipient_id']['ssid']) in self.routing_table:
       ip_destination_address = (
         self.routing_table[
           (frame_info['recipient_id']['callsign'],
@@ -468,7 +466,7 @@ class UDP_Router:
       if ip_destination_address != ip_source_address:
         # try to send packet
         try:
-          if conf['debug'] >= 3 is True:
+          if conf['debug'] >= 3:
             logfile.log_print("Sending UDP packet for %s-%i to %s:%i" % \
                             (frame_info['recipient_id']['callsign'],
                              frame_info['recipient_id']['ssid'],
@@ -512,9 +510,9 @@ def load_configuration():
           "version", \
         ]
       )
-  except getopt.GetoptError, error_message:
-    print "GetOpt Error:",
-    print error_message
+  except getopt.GetoptError as error_message:
+    print("GetOpt Error:", end=' ')
+    print(error_message)
     show_usage()
     sys.exit(1)
 
@@ -539,7 +537,7 @@ def load_configuration():
 
     # version
     if option in ("-V", "--version"):
-      print __version__
+      print(__version__)
       sys.exit(0)
 
     # be verbose
@@ -551,9 +549,9 @@ def load_configuration():
       try:
         conf['debug'] = int(argument)
         # raise Exception if debug level is out of range 0..9
-        if conf['debug'] not in range(0,10): raise Exception
+        if conf['debug'] not in list(range(0,10)): raise Exception
       except:
-        print "option debug: illegal debug level"
+        print("option debug: illegal debug level")
         show_usage()
         sys.exit(1)
 
@@ -599,7 +597,7 @@ def load_configuration():
       try:
         conf['udp_port'] = int(argument)
       except:
-        print "option udp_port: illegal port number"
+        print("option udp_port: illegal port number")
         show_usage()
         sys.exit(1)
 
@@ -633,16 +631,16 @@ def open_logfile():
   """
   # print a message that we try to open the logfile
   if conf['quiet'] is False:
-    print "Open logfile %s:" % (conf['logfile']),
+    print("Open logfile %s:" % (conf['logfile']), end=' ')
   # try to open logfile in same directory as the router executable
   try:
     logfile.open_logfile(conf['workdir'], conf['logfile'])
     if conf['quiet'] is False:
-      print "OK"
-  except Exception, error_message:
+      print("OK")
+  except Exception as error_message:
     if conf['quiet'] is False:
-      print "FAILED"
-      print error_message
+      print("FAILED")
+      print(error_message)
     sys.exit(1)
 
 def main():
