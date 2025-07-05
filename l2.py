@@ -619,7 +619,7 @@ def decode_frame(packet, debugvalue):
     logfile.log("Frame Type   : %s" % (frame_info['frame_type']) + NL)
 
   # If we have a frame with a PID (I or UI information frame)
-  if frame_info.has_key('protocol_id') == True:
+  if ('protocol_id' in frame_info) == True:
     # Try to read the protocol id (PID) byte only for frames which have a PID
     # and go to the next character (the information field which contains data)
     try:

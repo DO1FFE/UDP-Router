@@ -34,7 +34,8 @@ from const import *
 def dump_string(string, file=None):
   """convert contents of a string into character, decimal and hexadecimal"""
   # if no file is given, use stdout for output
-  if file is not None: file = sys.stdout
+  if file is None:
+    file = sys.stdout
   # begin strings with a quote
   posstring = "\""
   hexstring = "\""
